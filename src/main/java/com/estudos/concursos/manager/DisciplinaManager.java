@@ -1,5 +1,6 @@
 package com.estudos.concursos.manager;
 
+import com.estudos.concursos.domain.model.DisciplinaResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -8,10 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
 
 /**
  * @author eduardooliveira
@@ -22,19 +20,21 @@ public class DisciplinaManager {
 
     @Autowired
     private GPTManager gptManager;
+
+
     public List<String> gerarSugestoesDeEstudo(String nomeDisciplina) throws JsonProcessingException {
         // faz a chamada para a API do GPT-3.5-turbo usando OpenAI
         String respostaApi = chamarApiGpt3(nomeDisciplina);
 
         // extrai as sugestões de conteúdo programático e o passo a passo de estudo da resposta da API
-        List<String> sugestoesConteudo = extrairSugestoesConteudo(respostaApi);
+        String sugestoesConteudo = extrairSugestoesConteudo(respostaApi).toString();
 //        String passoAPassoEstudo = extrairPassoAPassoEstudo(respostaApi);
 
         // adiciona as sugestões de conteúdo programático e o passo a passo de estudo a uma lista e retorna
-        List<String> sugestoesDeEstudo = new ArrayList<>();
-        sugestoesDeEstudo.addAll(sugestoesConteudo);
+//        List<String> sugestoesDeEstudo = new ArrayList<>();
+//        sugestoesDeEstudo.addAll(sugestoesConteudo);
 //        sugestoesDeEstudo.add(passoAPassoEstudo);
-        return sugestoesDeEstudo;
+        return Collections.singletonList(sugestoesConteudo);
     }
 
     private String chamarApiGpt3(String nomeDisciplina) {
@@ -42,14 +42,11 @@ public class DisciplinaManager {
         return "Sugestões de conteúdo programático e passo a passo de estudo para " + nomeDisciplina;
     }
 
-    private List<String> extrairSugestoesConteudo(String respostaApi) throws JsonProcessingException {
+    private DisciplinaResponse extrairSugestoesConteudo(String respostaApi)  {
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode rootNode = objectMapper.readTree(respostaApi);
-        JsonNode choicesNode = rootNode.get("choices").get(0);
-        String text = choicesNode.get("text").asText();
-        String[] sugestoes = text.split(";");
-        return Arrays.asList(sugestoes);
+        return new DisciplinaResponse(
+                respostaApi
+        );
     }
 
 
